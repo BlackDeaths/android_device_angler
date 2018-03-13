@@ -31,10 +31,11 @@ PRODUCT_MODEL := Nexus 6P
 PRODUCT_MANUFACTURER := Huawei
 
 # Nitrogen Device Maintainers
- PRODUCT_BUILD_PROP_OVERRIDES += \
- DEVICE_MAINTAINERS="BlackDeaths(github),Blackjubel(xda)"
+PRODUCT_BUILD_PROP_OVERRIDES += \
+    DEVICE_MAINTAINERS="Blackjubel (BlackDeaths)"
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     PRODUCT_NAME=angler \
-    BUILD_FINGERPRINT=google/angler/angler:8.1.0/OPM1.171019.011/4448085:user/release-keys \
-    PRIVATE_BUILD_DESC="angler-user 8.1.0 OPM1.171019.011 4448085 release-keys"
+    BUILD_FINGERPRINT=google/angler/angler:8.1.0/OPM3.171019.016/4565142:user/release-keys \
+    PRIVATE_BUILD_DESC="angler-user 8.1.0 OPM3.171019.016 4565142 release-keys"
+

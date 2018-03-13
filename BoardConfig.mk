@@ -22,12 +22,14 @@ TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := cortex-a53
+TARGET_CPU_FEATURES := a53
 
 TARGET_2ND_ARCH := arm
 TARGET_2ND_ARCH_VARIANT := armv7-a-neon
 TARGET_2ND_CPU_ABI := armeabi-v7a
 TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := cortex-a53.a57
+TARGET_2ND_CPU_FEATURES := div,atomic_ldrd_strd,armv8a
 
 # Inline kernel building
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/aarch64/aarch64-linux-android-4.9/bin
@@ -42,14 +44,18 @@ BOARD_KERNEL_PAGESIZE    := 4096
 BOARD_KERNEL_TAGS_OFFSET := 0x01E00000
 BOARD_RAMDISK_OFFSET     := 0x02000000
 
-BOARD_KERNEL_CMDLINE := androidboot.selinux=permissive androidboot.hardware=angler androidboot.console=ttyHSL0 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 boot_cpus=0-3 no_console_suspend
+BOARD_KERNEL_CMDLINE := androidboot.selinux=permissive androidboot.hardware=angler androidboot.console=ttyHSL0 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 boot_cpus=0-3,4-7 no_console_suspend
 BOARD_KERNEL_CMDLINE += loop.max_part=7
 
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 
-BOARD_USES_ALSA_AUDIO := true
 # Needed for VoLTE
 AUDIO_FEATURE_ENABLED_MULTI_VOICE_SESSIONS := true
+AUDIO_FEATURE_ENABLED_DSM_FEEDBACK := true
+
+BOARD_SUPPORTS_SOUND_TRIGGER := true
+
+BOARD_USES_ALSA_AUDIO := true
 
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
@@ -96,6 +102,7 @@ BOARD_CHARGER_ENABLE_SUSPEND := true
 ifeq ($(HOST_OS),linux)
   ifneq ($(TARGET_BUILD_VARIANT),eng)
     ifeq ($(WITH_DEXPREOPT),)
+      WITH_DEXPREOPT_BOOT_IMG_AND_SYSTEM_SERVER_ONLY := false
       WITH_DEXPREOPT := true
     endif
   endif
@@ -159,9 +166,10 @@ BOARD_PERFSETUP_SCRIPT := platform_testing/scripts/perf-setup/angler-setup.sh
 
 TARGET_FS_CONFIG_GEN += device/huawei/angler/config.fs
 
-# Use Snapdragon LLVM, if available
-TARGET_USE_SDCLANG := true
+# Compile libhwui in performance mode
+HWUI_COMPILE_FOR_PERF := true
 
+# Use Snapdragon LLVM, if available
 ifneq ($(HOST_OS),darwin) 
     SDCLANG := true 
     SDCLANG_PATH := prebuilts/clang/linux-x86/host/sdclang-4.0/bin 

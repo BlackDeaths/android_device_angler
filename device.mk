@@ -64,7 +64,7 @@ PRODUCT_COPY_FILES += \
 # Audio
 PRODUCT_COPY_FILES += \
     device/huawei/angler/audio_output_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_output_policy.conf \
-    device/huawei/angler/audio_effects.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.conf \
+    device/huawei/angler/audio_effects.conf:system/etc/audio_effects_vendor.conf \
     device/huawei/angler/mixer_paths.xml:system/etc/mixer_paths.xml \
     device/huawei/angler/audio_platform_info_i2s.xml:system/etc/audio_platform_info_i2s.xml \
     device/huawei/angler/sound_trigger_mixer_paths.xml:system/etc/sound_trigger_mixer_paths.xml \
@@ -194,7 +194,7 @@ PRODUCT_PACKAGES += \
     android.hardware.renderscript@1.0-impl
 
 PRODUCT_PACKAGES += \
-    android.hardware.drm@1.0-impl \
+    android.hardware.drm@1.0-impl 
 
 USE_XML_AUDIO_POLICY_CONF := 1
 PRODUCT_PACKAGES += \
@@ -239,13 +239,17 @@ PRODUCT_PACKAGES += \
     libmmcamera_interface2 \
     libmmjpeg_interface \
     libqomx_core \
-    mm-qcamera-app
+    mm-qcamera-app \
+    Snap
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.camera.cpp.duplication=false
 
 # GPS
 PRODUCT_PACKAGES += \
     libgps.utils \
     gps.msm8994
-
+	
 PRODUCT_PACKAGES += \
     android.hardware.graphics.composer@2.1-impl
 
@@ -261,7 +265,7 @@ PRODUCT_PACKAGES += \
     activity_recognition.angler \
     context_hub.default \
     android.hardware.sensors@1.0-impl \
-    android.hardware.contexthub@1.0-impl \
+    android.hardware.contexthub@1.0-impl
 
 # new gatekeeper HAL
 PRODUCT_PACKAGES += \
@@ -311,7 +315,7 @@ PRODUCT_PACKAGES += \
     NfcNci \
     Tag \
     nfc_nci.angler \
-    android.hardware.nfc@1.0-impl \
+    android.hardware.nfc@1.0-impl 
 
 # Keymaster HAL
 PRODUCT_PACKAGES += \
@@ -338,6 +342,7 @@ PRODUCT_PACKAGES += \
 #USB HAL
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service
+	
 # Library used for VTS tests  (only for userdebug and eng builds)
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
 # For VTS profiling.
@@ -346,8 +351,9 @@ PRODUCT_PACKAGES += \
      libvts_multidevice_proto
 endif
 
+
 PRODUCT_COPY_FILES += \
-    device/huawei/angler/nfc/libnfc-nci.conf:system/etc/libnfc-nci.conf \
+    device/huawei/angler/nfc/libnfc-brcm.conf:system/etc/libnfc-brcm.conf \
     device/huawei/angler/nfc/libnfc-nxp.conf:system/etc/libnfc-nxp.conf
 
 DEVICE_PACKAGE_OVERLAYS := \
@@ -375,6 +381,22 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
     media.recorder.show_manufacturer_and_model=true
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.ril.force_eri_from_xml=true
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hwui.texture_cache_size=72 \
+    ro.hwui.layer_cache_size=48 \
+    ro.hwui.r_buffer_cache_size=8 \
+    ro.hwui.path_cache_size=32 \
+    ro.hwui.gradient_cache_size=1 \
+    ro.hwui.drop_shadow_cache_size=6 \
+    ro.hwui.texture_cache_flushrate=0.4 \
+    ro.hwui.text_small_cache_width=1024 \
+    ro.hwui.text_small_cache_height=1024 \
+    ro.hwui.text_large_cache_width=2048 \
+    ro.hwui.text_large_cache_height=1024
 
 # Enable low power video mode for 4K encode
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -431,6 +453,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.data_no_toggle=1
 
+# Allow tethering without provisioning app
+PRODUCT_PROPERTY_OVERRIDES += \
+    net.tethering.noprovisioning=true
+
 # Ril sends only one RIL_UNSOL_CALL_RING, so set call_ring.multiple to false
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.call_ring.multiple=0
@@ -451,7 +477,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 #for qcom modify fluence type name, here added and enable
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.qc.sdk.audio.fluencetype="fluence" \
-    persist.audio.fluence.voicecall=true \
+    persist.audio.fluence.voicecall=false \
     persist.audio.fluence.voicecomm=true \
     persist.audio.product.identify="angler" \
     persist.audio.fluence.speaker=true
@@ -493,7 +519,7 @@ PRODUCT_PACKAGES += \
 # limit dex2oat threads to improve thermals
 PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.boot-dex2oat-threads=4 \
-    dalvik.vm.dex2oat-threads=4 \
+    dalvik.vm.dex2oat-threads=2 \
     dalvik.vm.image-dex2oat-threads=4
 
 # old-apns.conf
@@ -530,11 +556,23 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.product.first_api_level=23
 
+
 # configure the HWUI memory limits
 $(call inherit-product, vendor/nitrogen/config/phone-xxxhdpi-3072-hwui-memory.mk)
 
 # setup dalvik vm configs.
 $(call inherit-product, vendor/nitrogen/config/phone-xxxhdpi-3072-dalvik-heap.mk)
+
+# In userdebug, add minidebug info the the boot image and the system server to support
+# diagnosing native crashes.
+ifneq (,$(filter userdebug, $(TARGET_BUILD_VARIANT)))
+    # Boot image.
+    PRODUCT_DEX_PREOPT_BOOT_FLAGS += --generate-mini-debug-info
+    # System server and some of its services.
+    # Note: we cannot use PRODUCT_SYSTEM_SERVER_JARS, as it has not been expanded at this point.
+    $(call add-product-dex-preopt-module-config,services,--generate-mini-debug-info)
+    $(call add-product-dex-preopt-module-config,wifi-service,--generate-mini-debug-info)
+endif
 
 # drmservice prop
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -550,8 +588,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 $(call inherit-product-if-exists, hardware/qcom/msm8994/msm8994.mk)
 $(call inherit-product-if-exists, vendor/qcom/gpu/msm8994/msm8994-gpu-vendor.mk)
 
-# copy wlan firmware
-$(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4358/device-bcm.mk)
+# copy wlan configs
+$(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/config/config-bcm.mk)
 
 # GPS configuration
 PRODUCT_COPY_FILES += \

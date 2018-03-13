@@ -48,7 +48,7 @@ write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
 restorecon -R /sys/devices/system/cpu # must restore after interactive
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_sched_load 1
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_migration_notif 1
-write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay 19000
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay 18000
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load 99
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate 20000
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/hispeed_freq 960000
@@ -57,6 +57,20 @@ write /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads "65 460000:7
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/min_sample_time 40000
 write /sys/devices/system/cpu/cpu0/cpufreq/interactive/max_freq_hysteresis 80000
 write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 384000
+write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1555200
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load 93
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay "0 600000:19000 672000:20000 960000:24000 1248000:38000"
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate 50000
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/hispeed_freq 600000
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_slack 380000
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads "29 384000:88 600000:90 672000:92 960000:93 1248000:98"
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/min_sample_time 60000
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost 0
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/align_windows 1
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_migration_notif 1
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_sched_load 0
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/max_freq_hysteresis 0
+write /sys/devices/system/cpu/cpu0/cpufreq/interactive/boostpulse_duration 0
 
 # online CPU4
 write /sys/devices/system/cpu/cpu4/online 1
@@ -64,9 +78,21 @@ write /sys/devices/system/cpu/cpu4/online 1
 # configure governor settings for big cluster
 write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor interactive
 restorecon -R /sys/devices/system/cpu # must restore after interactive
-write /sys/devices/system/cpu/cpu4/cpufreq/interactive/use_sched_load 1
+write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 384000
+write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 1958400
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load 150
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay "20000 960000:40000 1248000:30000"
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate 60000
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/hispeed_freq 960000
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads 98
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/min_sample_time 60000
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/boost 0
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/align_windows 1
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/use_migration_notif 1
-write /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay 19000
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/use_sched_load 0
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/max_freq_hysteresis 0
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/boostpulse_duration 0
+write /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay 18000
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load 99
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate 20000
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/hispeed_freq 1248000
@@ -75,6 +101,7 @@ write /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads "70 960000:8
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/min_sample_time 40000
 write /sys/devices/system/cpu/cpu4/cpufreq/interactive/max_freq_hysteresis 80000
 write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 633600
+
 
 # restore A57's max
 copy /sys/devices/system/cpu/cpu4/cpufreq/cpuinfo_max_freq /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
@@ -88,8 +115,13 @@ write /sys/devices/system/cpu/cpu7/online 1
 write /sys/module/msm_performance/parameters/cpu_max_freq "4:4294967295 5:4294967295 6:4294967295 7:4294967295"
 
 # input boost configuration
-write /sys/module/cpu_boost/parameters/input_boost_freq "0:1344000"
-write /sys/module/cpu_boost/parameters/input_boost_ms 40
+write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+write /sys/module/cpu_boost/parameters/boost_ms 40
+write /sys/module/cpu_boost/parameters/input_boost_freq "0:600000 1:600000 2:600000 3:600000 4:960000 5:960000 6:960000 7:960000"
+write /sys/module/cpu_boost/parameters/input_boost_ms 300
+write /sys/module/cpu_boost/parameters/load_based_syncs Y
+write /sys/module/cpu_boost/parameters/migration_load_threshold 15
+write /sys/module/cpu_boost/parameters/sync_threshold 1248000
 
 # Setting B.L scheduler parameters
 write /proc/sys/kernel/sched_migration_fixup 1
@@ -105,6 +137,40 @@ get-set-forall  /sys/class/devfreq/qcom,cpubw*/governor bw_hwmon
 
 # Disable sched_boost
 write /proc/sys/kernel/sched_boost 0
+
+# Enable fingerprint boost
+write /sys/kernel/fp_boost/enabled 1
+
+# Set I/O Scheduler tweaks
+write /sys/block/mmcblk0/queue/scheduler maple
+write /sys/block/mmcblk0/queue/read_ahead_kb 512
+write /sys/block/mmcblk0/queue/iosched/writes_starved 4
+write /sys/block/mmcblk0/queue/iosched/fifo_batch 16
+write /sys/block/mmcblk0/queue/iosched/sync_read_expire 350
+write /sys/block/mmcblk0/queue/iosched/sync_write_expire 550
+write /sys/block/mmcblk0/queue/iosched/async_read_expire 250
+write /sys/block/mmcblk0/queue/iosched/async_write_expire 450
+write /sys/block/mmcblk0/queue/iosched/sleep_latency_multiple 10
+
+# Disable some wakelocks
+write /sys/module/wakeup/parameters/enable_wlan_rx_wake_ws 0
+write /sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws 0
+write /sys/module/wakeup/parameters/enable_wlan_wake_ws 0
+write /sys/module/wakeup/parameters/enable_msm_hsic_ws 0
+write /sys/module/wakeup/parameters/enable_qcom_rx_wakelock_ws 0
+write /sys/module/wakeup/parameters/enable_netlink_ws 0
+write /sys/module/wakeup/parameters/enable_ipa_ws 0
+write /sys/module/wakeup/parameters/enable_timerfd_ws 0
+
+# Backlight dimmer
+write /sys/module/mdss_fb/parameters/backlight_dimmer 1
+
+# Wakelock dividers
+write /sys/module/bcmdhd/parameters/wlrx_divide 8
+write /sys/module/bcmdhd/parameters/wlctrl_divide 8
+
+# Don't treat storage as rotational
+write /sys/block/mmcblk0/queue/rotational 0
 
 # re-enable thermal and BCL hotplug
 write /sys/module/msm_thermal/core_control/enabled 1
